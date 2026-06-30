@@ -3,28 +3,27 @@ import telebot
 from flask import Flask, request
 
 # --- CẤU HÌNH ---
-# Sử dụng Token mới nhất của bạn
-TOKEN = "8888049748:AAEamVRLb_uo9hjbiG2CidxGk2Z6-VGDuro"
-# THAY BẰNG LINK RENDER CỦA BẠN (VD: https://my-bot.onrender.com)
+# DÁN TOKEN MỚI NHẤT VÀO ĐÂY
+TOKEN = "8888049748:AAEamVRLb_uo9hjbiG2CidxGk2Z6-VGDuro" 
+# THAY BẰNG LINK RENDER THỰC TẾ CỦA BẠN (VD: https://ten-bot-cua-ban.onrender.com)
 WEBHOOK_URL = "https://my-telegram-bot-u55q.onrender.com" 
 
 bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
 
-# --- XỬ LÝ TIN NHẮN BUSINESS ---
+# --- XỬ LÝ TIN NHẮN ---
 @bot.business_message_handler(func=lambda message: True)
 def handle_business(message):
     try:
-        # Gửi tin nhắn trả lời tự động cho khách
         bot.send_message(
             chat_id=message.chat.id,
-            text="👋 Chào bạn! Tôi là Trợ lý AI tự động. Admin hiện đang bận, tôi đã ghi nhận tin nhắn của bạn!",
+            text="👋 Chào bạn! Tôi là Trợ lý AI. Admin đang bận, tôi sẽ phản hồi sớm nhất!",
             business_connection_id=message.business_connection_id
         )
     except Exception as e:
         print(f"Lỗi gửi tin: {e}")
 
-# --- WEBHOOK ENDPOINT (Cổng nhận tin từ Telegram) ---
+# --- WEBHOOK ENDPOINT ---
 @app.route(f'/{TOKEN}', methods=['POST'])
 def webhook():
     if request.headers.get('content-type') == 'application/json':
@@ -34,16 +33,12 @@ def webhook():
         return 'OK', 200
     return 'Forbidden', 403
 
-# --- KIỂM TRA BOT ---
-@app.route('/')
-def index():
-    return "Bot đang chạy ổn định qua Webhook!"
-
+# --- KHỞI CHẠY ---
 if __name__ == '__main__':
-    # THIẾT LẬP WEBHOOK (Xóa polling cũ, đặt webhook mới)
+    # Xóa webhook cũ và đặt mới để tránh lỗi 409
     bot.remove_webhook()
     bot.set_webhook(url=f"{WEBHOOK_URL}/{TOKEN}")
     
-    # Chạy server Flask
+    # Render yêu cầu dùng port 10000
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
